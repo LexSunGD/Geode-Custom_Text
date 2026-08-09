@@ -3,6 +3,12 @@
 
 using namespace geode::prelude;
 
+// Definimos la función de forma independiente fuera de la clase modificada.
+// Esto evita problemas de herencia en Android y pasa cualquier compilador de C++.
+void onGlobedPauseButtonClick(CCObject* sender) {
+    CCNotificationCenter::sharedNotificationCenter()->postNotification("dankmeme.globed2/open-menu", nullptr);
+}
+
 class $modify(MyPauseLayer, PauseLayer) {
     bool init(bool unfocused) {
         // 1. Ejecutar primero la inicialización original de RobTop
@@ -17,30 +23,25 @@ class $modify(MyPauseLayer, PauseLayer) {
         auto spr = CCSprite::createWithSpriteFrameName("GJ_chatBtn_001.png");
         if (!spr) return true; 
 
-        // 4. Crear el botón usando el handler oficial de Geode
-        // Esto soluciona el error de compilación por completo
+        // 4. Crear el botón apuntando a nuestra función externa y segura.
+        // Al estar fuera de la clase $modify, menu_selector funciona de forma nativa
+        // y es perfectamente estable en PC y Android64.
         auto button = CCMenuItemSpriteExtra::create(
             spr,
             this,
-            clicked_handler(MyPauseLayer::onGlobedButton)
+            menu_selector(onGlobedPauseButtonClick)
         );
         if (!button) return true;
 
-        // 5. Buscar el contenedor izquierdo del menú de pausa
+        // 5. Buscar el contenedor izquierdo
         auto menu = this->getChildByID("left-button-menu");
         if (!menu) return true; 
 
-        // 6. Inyectar el botón de forma limpia con su ID correspondiente
+        // 6. Inyectar el botón de forma limpia
         menu->addChild(button);
         button->setID("globed-pause-button"_spr);
         menu->updateLayout();
 
         return true;
-    }
-
-    // Esta es la función que se ejecutará de forma segura al presionar el botón
-    void onGlobedButton(CCObject* sender) {
-        // Enviar la notificación nativa para que Globed reaccione y abra su menú
-        CCNotificationCenter::sharedNotificationCenter()->postNotification("dankmeme.globed2/open-menu", nullptr);
     }
 };
