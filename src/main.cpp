@@ -3,38 +3,54 @@
 
 using namespace geode::prelude;
 
+// ==========================================
+// 1. INTERFAZ DE GLOBED (ENLACE INTER-MOD)
+// ==========================================
+// Declaramos la clase original de Globed para que tu mod pueda llamarla directamente.
+// No necesitas programarla, solo decirle a C++ que existe en la memoria del juego.
+class GlobedMenuPopup : public FLAlertLayer {
+public:
+    static GlobedMenuPopup* create() {
+        // Buscamos la dirección en la memoria del mod instalado
+        return reinterpret_cast<GlobedMenuPopup*(*)(bool)>(
+            geode::addresser::getNonVirtual(
+                geode::modifier::Resolve<bool>::func(&GlobedMenuPopup::create)
+            )
+        )(false);
+    }
+    void show();
+};
+
+// ==========================================
+// 2. MODIFICACIÓN DEL MENÚ DE PAUSA
+// ==========================================
 class $modify(MyPauseLayer, PauseLayer) {
-    // 1. Usamos customSetup en lugar de init para máxima estabilidad en Android
     void customSetup() {
         PauseLayer::customSetup();
 
-        // 2. Buscamos el menú izquierdo directamente usando Node-IDs
+        // Buscamos el menú izquierdo (Lógica que ya aprobó el compilador)
         auto targetMenu = static_cast<CCMenu*>(this->getChildByID("left-button-menu"));
 
-        // 3. Si el menú existe, inyectamos el botón de forma directa
         if (targetMenu) {
-            // El sprite del chat
             auto spr = CCSprite::createWithSpriteFrameName("GJ_chatBtn_001.png");
             
-            // Creamos el botón usando menu_selector de la forma tradicional que ya demostró funcionar
             auto btn = CCMenuItemSpriteExtra::create(
                 spr, 
                 this, 
                 menu_selector(MyPauseLayer::onGlobedButton)
             );
             
-            // Añadimos al menú y actualizamos el layout automático
             targetMenu->addChild(btn);
             btn->setID("globed-pause-button"_spr);
             targetMenu->updateLayout();
         }
     }
     
-    // 4. La función que se ejecuta al presionar el botón (siguiendo la firma exacta del ejemplo)
+    // Esta es la nueva acción que abre la ventana flotante de tu imagen
     void onGlobedButton(CCObject* sender) {
-        CCNotificationCenter::sharedNotificationCenter()->postNotification(
-            "dankmeme.globed2/open-menu", 
-            nullptr
-        );
+        // Llamamos directamente a la ventana emergente de Globed
+        if (auto popup = GlobedMenuPopup::create()) {
+            popup->show();
+        }
     }
 };
