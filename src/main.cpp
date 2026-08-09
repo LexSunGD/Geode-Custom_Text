@@ -7,7 +7,6 @@ class $modify(MyPauseLayer, PauseLayer) {
     void customSetup() {
         PauseLayer::customSetup();
 
-        // Buscamos el menú izquierdo (Lógica aprobada por el compilador)
         auto targetMenu = static_cast<CCMenu*>(this->getChildByID("left-button-menu"));
 
         if (targetMenu) {
@@ -25,14 +24,27 @@ class $modify(MyPauseLayer, PauseLayer) {
         }
     }
     
-    // Nueva acción segura a través de la API de Geode
     void onGlobedButton(CCObject* sender) {
-        // Ejecutamos el comando interno que invoca la interfaz de Globed
-        // Esto le dice a Geode que busque y abra el menú de forma nativa y segura
-        geode::Loader::get()->getLoadedMod("dankmeme.globed2")->getSettingValue<bool>("open-menu"); 
+        this->scheduleOnce(schedule_selector(MyPauseLayer::triggerGlobedMenu), 0.0f);
+    }
+
+    void triggerGlobedMenu(float dt) {
+        // Enviamos las 3 variantes de nombres que Globed usa en sus diferentes versiones.
+        // Las que no existan serán ignoradas por el juego, pero la correcta activará el menú.
         
-        // NOTA: Si el comando de arriba no responde en tu versión de Globed, 
-        // la alternativa estándar de Geode para disparar la interfaz por texto es:
-        // geode::Console::get()->executeCommand("globed open");
+        // Variante 1: La clásica de Geode
+        CCNotificationCenter::sharedNotificationCenter()->postNotification(
+            "dankmeme.globed2/open-menu", nullptr
+        );
+
+        // Variante 2: La ruta directa de la interfaz de Globed
+        CCNotificationCenter::sharedNotificationCenter()->postNotification(
+            "globed/open-menu", nullptr
+        );
+
+        // Variante 3: El trigger de la capa flotante (Popup)
+        CCNotificationCenter::sharedNotificationCenter()->postNotification(
+            "dankmeme.globed2/open-popup", nullptr
+        );
     }
 };
