@@ -4,34 +4,25 @@
 using namespace geode::prelude;
 
 class $modify(MyPauseLayer, PauseLayer) {
+    // Función estática: No requiere instancias ni clases extra, directo al grano
+    static void onGlobedClick(CCObject* sender) {
+        CCNotificationCenter::sharedNotificationCenter()->postNotification("dankmeme.globed2/open-menu", nullptr);
+    }
+
     bool init(bool unfocused) {
         if (!PauseLayer::init(unfocused)) return false;
 
-        // 1. Verificación de seguridad
-        if (!Loader::get()->isModLoaded("dankmeme.globed2")) {
-            return true; 
-        }
-
-        // 2. Crear el sprite del botón
+        // 1. Crear el aspecto del botón
         auto spr = CCSprite::createWithSpriteFrameName("GJ_chatBtn_001.png");
-        if (!spr) return true; 
+        
+        // 2. Crear el botón apuntando directamente a nuestra función estática
+        auto button = CCMenuItemSpriteExtra::create(spr, nullptr, menu_selector(MyPauseLayer::onGlobedClick));
 
-        // 3. Crear el botón TOTALMENTE LIMPIO (sin selectores ni funciones extra)
-        auto button = CCMenuItemSpriteExtra::create(spr, this, nullptr);
-        if (!button) return true;
-
-        // 4. Esta es la forma nativa y moderna de Geode para Android. ¡Cero errores!
-        button->setCallback([](CCObject*) {
-            CCNotificationCenter::sharedNotificationCenter()->postNotification("dankmeme.globed2/open-menu", nullptr);
-        });
-
-        // 5. Inyectar usando node-ids de forma segura
-        auto menu = this->getChildByID("left-button-menu");
-        if (!menu) return true; 
-
-        menu->addChild(button);
-        button->setID("globed-pause-button"_spr);
-        menu->updateLayout();
+        // 3. Buscar el menú izquierdo directamente por su ID nativo de Geode
+        if (auto menu = this->getChildByID("left-button-menu")) {
+            menu->addChild(button);
+            menu->updateLayout(); // Organiza el botón en la fila automáticamente
+        }
 
         return true;
     }
