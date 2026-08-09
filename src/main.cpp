@@ -4,26 +4,37 @@
 using namespace geode::prelude;
 
 class $modify(MyPauseLayer, PauseLayer) {
-    // Función estática: No requiere instancias ni clases extra, directo al grano
-    static void onGlobedClick(CCObject* sender) {
-        CCNotificationCenter::sharedNotificationCenter()->postNotification("dankmeme.globed2/open-menu", nullptr);
-    }
+    // 1. Usamos customSetup en lugar de init para máxima estabilidad en Android
+    void customSetup() {
+        PauseLayer::customSetup();
 
-    bool init(bool unfocused) {
-        if (!PauseLayer::init(unfocused)) return false;
+        // 2. Buscamos el menú izquierdo directamente usando Node-IDs
+        auto targetMenu = static_cast<CCMenu*>(this->getChildByID("left-button-menu"));
 
-        // 1. Crear el aspecto del botón
-        auto spr = CCSprite::createWithSpriteFrameName("GJ_chatBtn_001.png");
-        
-        // 2. Crear el botón apuntando directamente a nuestra función estática
-        auto button = CCMenuItemSpriteExtra::create(spr, nullptr, menu_selector(MyPauseLayer::onGlobedClick));
-
-        // 3. Buscar el menú izquierdo directamente por su ID nativo de Geode
-        if (auto menu = this->getChildByID("left-button-menu")) {
-            menu->addChild(button);
-            menu->updateLayout(); // Organiza el botón en la fila automáticamente
+        // 3. Si el menú existe, inyectamos el botón de forma directa
+        if (targetMenu) {
+            // El sprite del chat
+            auto spr = CCSprite::createWithSpriteFrameName("GJ_chatBtn_001.png");
+            
+            // Creamos el botón usando menu_selector de la forma tradicional que ya demostró funcionar
+            auto btn = CCMenuItemSpriteExtra::create(
+                spr, 
+                this, 
+                menu_selector(MyPauseLayer::onGlobedButton)
+            );
+            
+            // Añadimos al menú y actualizamos el layout automático
+            targetMenu->addChild(btn);
+            btn->setID("globed-pause-button"_spr);
+            targetMenu->updateLayout();
         }
-
-        return true;
+    }
+    
+    // 4. La función que se ejecuta al presionar el botón (siguiendo la firma exacta del ejemplo)
+    void onGlobedButton(CCObject* sender) {
+        CCNotificationCenter::sharedNotificationCenter()->postNotification(
+            "dankmeme.globed2/open-menu", 
+            nullptr
+        );
     }
 };
