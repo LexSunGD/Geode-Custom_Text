@@ -23,27 +23,26 @@ class $modify(MyPlayLayer, PlayLayer) {
         auto configDir = Mod::get()->getConfigDir();
         auto jsonPath = configDir / "recipe.json";
 
-        // Si el archivo no existe en la carpeta config, lo creamos de forma automática
+        // Si el archivo no existe en la carpeta config, lo creamos de forma automática escribiendo el texto plano
         if (!ghc::filesystem::exists(jsonPath)) {
-            // CORRECCIÓN: En Geode moderno, matjson permite inicializar arreglos y objetos usando llaves {} directamente
-            matjson::Value defaultJson = matjson::Value::array({
-                matjson::Value::object({{"percentage", 0.0}, {"sprite", "NA_dif.png"}}),
-                matjson::Value::object({{"percentage", 8.33}, {"sprite", "Auto_dif.png"}}),
-                matjson::Value::object({{"percentage", 16.66}, {"sprite", "Easy_dif.png"}}),
-                matjson::Value::object({{"percentage", 25.0}, {"sprite", "Normal_dif.png"}}),
-                matjson::Value::object({{"percentage", 33.33}, {"sprite", "Hard_dif.png"}}),
-                matjson::Value::object({{"percentage", 41.66}, {"sprite", "Harder_dif.png"}}),
-                matjson::Value::object({{"percentage", 50.0}, {"sprite", "Insane_dif.png"}}),
-                matjson::Value::object({{"percentage", 66.66}, {"sprite", "EasyDemon_dif.png"}}),
-                matjson::Object({{"percentage", 75.0}, {"sprite", "MediumDemon_dif.png"}}),
-                matjson::Value::object({{"percentage", 83.33}, {"sprite", "HardDemon_dif.png"}}),
-                matjson::Value::object({{"percentage", 91.66}, {"sprite", "InsaneDemon_dif.png"}}),
-                matjson::Value::object({{"percentage", 100.0}, {"sprite", "ExtremeDemon_dif.png"}})
-            });
+            std::string defaultJsonStr = 
+            "[\n"
+            "    { \"percentage\": 0.0, \"sprite\": \"NA_dif.png\" },\n"
+            "    { \"percentage\": 8.33, \"sprite\": \"Auto_dif.png\" },\n"
+            "    { \"percentage\": 16.66, \"sprite\": \"Easy_dif.png\" },\n"
+            "    { \"percentage\": 25.0, \"sprite\": \"Normal_dif.png\" },\n"
+            "    { \"percentage\": 33.33, \"sprite\": \"Hard_dif.png\" },\n"
+            "    { \"percentage\": 41.66, \"sprite\": \"Harder_dif.png\" },\n"
+            "    { \"percentage\": 50.0, \"sprite\": \"Insane_dif.png\" },\n"
+            "    { \"percentage\": 66.66, \"sprite\": \"EasyDemon_dif.png\" },\n"
+            "    { \"percentage\": 75.0, \"sprite\": \"MediumDemon_dif.png\" },\n"
+            "    { \"percentage\": 83.33, \"sprite\": \"HardDemon_dif.png\" },\n"
+            "    { \"percentage\": 91.66, \"sprite\": \"InsaneDemon_dif.png\" },\n"
+            "    { \"percentage\": 100.0, \"sprite\": \"ExtremeDemon_dif.png\" }\n"
+            "]";
 
             std::ofstream file(jsonPath);
-            // CORRECCIÓN: Usamos la indentación por defecto de matjson sin estructuras adicionales
-            file << defaultJson.dump(4);
+            file << defaultJsonStr;
             file.close();
         }
 
@@ -54,15 +53,21 @@ class $modify(MyPlayLayer, PlayLayer) {
             buffer << file.rdbuf();
             file.close();
 
-            // CORRECCIÓN: Se utiliza matjson::parse pasándole directamente el string
+            // Usamos matjson::parse pasándole directamente la cadena de texto
             auto jsonResult = matjson::parse(buffer.str());
-            if (jsonResult.is_ok()) {
-                auto json = jsonResult.unwrap();
-                if (json.is_array()) {
-                    for (const auto& item : json.as_array()) {
+            
+            // CORRECCIÓN: En Geode, la verificación del Result usa .has_value() y .value()
+            if (jsonResult.has_value()) {
+                auto json = jsonResult.value();
+                
+                // CORRECCIÓN: Comprobamos si es un arreglo usando el enum nativo matjson::Type::Array
+                if (json.type() == matjson::Type::Array) {
+                    for (size_t i = 0; i < json.size(); ++i) {
+                        auto item = json[i];
                         if (item.contains("percentage") && item.contains("sprite")) {
-                            float percent = static_cast<float>(item["percentage"].as_double());
-                            std::string sprite = item["sprite"].as_string();
+                            // CORRECCIÓN: Extraemos los tipos primitivos directamente convirtiendo los datos
+                            float percent = static_cast<float>(item["percentage"].as<double>());
+                            std::string sprite = item["sprite"].as<std::string>();
                             safeFields->m_loadedRecipe.push_back({ percent, sprite });
                         }
                     }
