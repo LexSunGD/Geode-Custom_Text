@@ -25,35 +25,37 @@ class $modify(MyPlayLayer, PlayLayer) {
 
         // Si el archivo no existe en la carpeta config, lo creamos de forma automática
         if (!ghc::filesystem::exists(jsonPath)) {
-            matjson::Value defaultJson = matjson::Array({
-                matjson::Object({{"percentage", 0.0}, {"sprite", "NA_dif.png"}}),
-                matjson::Object({{"percentage", 8.33}, {"sprite", "Auto_dif.png"}}),
-                matjson::Object({{"percentage", 16.66}, {"sprite", "Easy_dif.png"}}),
-                matjson::Object({{"percentage", 25.0}, {"sprite", "Normal_dif.png"}}),
-                matjson::Object({{"percentage", 33.33}, {"sprite", "Hard_dif.png"}}),
-                matjson::Object({{"percentage", 41.66}, {"sprite", "Harder_dif.png"}}),
-                matjson::Object({{"percentage", 50.0}, {"sprite", "Insane_dif.png"}}),
-                matjson::Object({{"percentage", 66.66}, {"sprite", "EasyDemon_dif.png"}}),
+            // CORRECCIÓN: En Geode moderno, matjson permite inicializar arreglos y objetos usando llaves {} directamente
+            matjson::Value defaultJson = matjson::Value::array({
+                matjson::Value::object({{"percentage", 0.0}, {"sprite", "NA_dif.png"}}),
+                matjson::Value::object({{"percentage", 8.33}, {"sprite", "Auto_dif.png"}}),
+                matjson::Value::object({{"percentage", 16.66}, {"sprite", "Easy_dif.png"}}),
+                matjson::Value::object({{"percentage", 25.0}, {"sprite", "Normal_dif.png"}}),
+                matjson::Value::object({{"percentage", 33.33}, {"sprite", "Hard_dif.png"}}),
+                matjson::Value::object({{"percentage", 41.66}, {"sprite", "Harder_dif.png"}}),
+                matjson::Value::object({{"percentage", 50.0}, {"sprite", "Insane_dif.png"}}),
+                matjson::Value::object({{"percentage", 66.66}, {"sprite", "EasyDemon_dif.png"}}),
                 matjson::Object({{"percentage", 75.0}, {"sprite", "MediumDemon_dif.png"}}),
-                matjson::Object({{"percentage", 83.33}, {"sprite", "HardDemon_dif.png"}}),
-                matjson::Object({{"percentage", 91.66}, {"sprite", "InsaneDemon_dif.png"}}),
-                matjson::Object({{"percentage", 100.0}, {"sprite", "ExtremeDemon_dif.png"}})
+                matjson::Value::object({{"percentage", 83.33}, {"sprite", "HardDemon_dif.png"}}),
+                matjson::Value::object({{"percentage", 91.66}, {"sprite", "InsaneDemon_dif.png"}}),
+                matjson::Value::object({{"percentage", 100.0}, {"sprite", "ExtremeDemon_dif.png"}})
             });
 
             std::ofstream file(jsonPath);
-            file << defaultJson.dump(matjson::FormatOptions { .indent = 4 });
+            // CORRECCIÓN: Usamos la indentación por defecto de matjson sin estructuras adicionales
+            file << defaultJson.dump(4);
             file.close();
         }
 
-        // Leer el archivo JSON de forma segura usando la nueva API matjson de Geode
+        // Leer el archivo JSON de forma segura usando la API estándar de Geode
         std::ifstream file(jsonPath);
         if (file.is_open()) {
             std::stringstream buffer;
             buffer << file.rdbuf();
             file.close();
 
-            // Usamos matjson::Value::from_str para procesar el string del archivo
-            auto jsonResult = matjson::Value::from_str(buffer.str());
+            // CORRECCIÓN: Se utiliza matjson::parse pasándole directamente el string
+            auto jsonResult = matjson::parse(buffer.str());
             if (jsonResult.is_ok()) {
                 auto json = jsonResult.unwrap();
                 if (json.is_array()) {
