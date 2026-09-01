@@ -2,7 +2,7 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <fstream>
 #include <sstream>
-#include <filesystem> // 👈 Reemplazo oficial de ghc::filesystem
+#include <filesystem>
 
 using namespace geode::prelude;
 
@@ -24,7 +24,6 @@ class $modify(MyPlayLayer, PlayLayer) {
         auto configDir = Mod::get()->getConfigDir();
         auto jsonPath = configDir / "recipe.json";
 
-        // CORRECCIÓN: Usamos std::filesystem de C++ estándar en lugar de ghc
         if (!std::filesystem::exists(jsonPath.string())) {
             std::string defaultJsonStr = 
             "[\n"
@@ -54,18 +53,12 @@ class $modify(MyPlayLayer, PlayLayer) {
             file.close();
 
             auto jsonResult = matjson::parse(buffer.str());
-            
-            // CORRECCIÓN: En el SDK moderno, geode::Result se valida tratándolo como booleano directo
             if (jsonResult) {
-                // CORRECCIÓN: Desempaquetamos usando unwrap()
                 auto json = jsonResult.unwrap();
-                
-                // Iteramos directamente usando un bucle de tamaño clásico sobre la estructura del arreglo
                 if (json.type() == matjson::Type::Array) {
                     for (size_t i = 0; i < json.size(); ++i) {
                         auto item = json[i];
                         if (item.contains("percentage") && item.contains("sprite")) {
-                            // CORRECCIÓN: Extraemos el valor desempaquetando los nuevos geode::Result de matjson
                             float percent = static_cast<float>(item["percentage"].asDouble().unwrap());
                             std::string sprite = item["sprite"].asString().unwrap();
                             safeFields->m_loadedRecipe.push_back({ percent, sprite });
@@ -84,6 +77,10 @@ class $modify(MyPlayLayer, PlayLayer) {
         if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
 
         if (level->isPlatformer()) return true;
+
+        // VERIFICACIÓN: Si el usuario activó "Desactivar Mod", salimos sin crear el medidor
+        bool isDisabled = Mod::get()->getSettingValue<bool>("disable-mod");
+        if (isDisabled) return true;
 
         this->loadJsonRecipe();
 
@@ -115,6 +112,19 @@ class $modify(MyPlayLayer, PlayLayer) {
     
     void updateProgressbar() {
         PlayLayer::updateProgressbar(); 
+
+        // VERIFICACIÓN EN VIVO: Si el mod se desactiva desde el menú de pausa, ocultamos el medidor inmediatamente
+        bool isDisabled = Mod::get()->getSettingValue<bool>("disable-mod");
+        if (isDisabled) {
+            if (m_fields->m_customDifficultyMeter) {
+                m_fields->m_customDifficultyMeter->setVisible(false);
+            }
+            return;
+        } else {
+            if (m_fields->m_customDifficultyMeter) {
+                m_fields->m_customDifficultyMeter->setVisible(true);
+            }
+        }
 
         if (!m_fields->m_customDifficultyMeter) return;
 
