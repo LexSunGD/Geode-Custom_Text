@@ -19,6 +19,12 @@
 		]
 	},
 	"settings": {
+		"disable-mod": {
+			"name": "Desactivar Mod",
+			"description": "Si está encendido, el medidor de dificultad personalizado no aparecerá.",
+			"type": "bool",
+			"default": false
+		},
 		"meter-scale": {
 			"name": "Escala del Medidor",
 			"description": "Controla el tamaño. 1.0 es original, 2.0 el doble, 0.5 la mitad.",
