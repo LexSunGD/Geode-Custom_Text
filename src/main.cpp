@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <fstream>
+#include <sstream>
 
 using namespace geode::prelude;
 
@@ -19,7 +20,6 @@ class $modify(MyPlayLayer, PlayLayer) {
         auto safeFields = m_fields.self();
         safeFields->m_loadedRecipe.clear();
 
-        // CAMBIO CLAVE: Usamos getConfigDir() para que el archivo vaya a la carpeta oficial de configs
         auto configDir = Mod::get()->getConfigDir();
         auto jsonPath = configDir / "recipe.json";
 
@@ -45,10 +45,15 @@ class $modify(MyPlayLayer, PlayLayer) {
             file.close();
         }
 
-        // Leer el archivo JSON desde la ruta de configuración
+        // Leer el archivo JSON de forma segura usando la nueva API matjson de Geode
         std::ifstream file(jsonPath);
-        if (file.is_stream()) {
-            auto jsonResult = matjson::parse(file);
+        if (file.is_open()) {
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+            file.close();
+
+            // Usamos matjson::Value::from_str para procesar el string del archivo
+            auto jsonResult = matjson::Value::from_str(buffer.str());
             if (jsonResult.is_ok()) {
                 auto json = jsonResult.unwrap();
                 if (json.is_array()) {
