@@ -1,27 +1,55 @@
 {
-	"geode": "5.8.2",
+	"geode": "5.10.1",
 	"gd": {
 		"win": "2.2081",
 		"android": "2.2081",
 		"mac": "2.2081",
 		"ios": "2.2081"
 	},
-	"id": "le10x.globed_in_pause_menu",
+	"id": "lexsungd.difficulty_meter_two",
 	"version": "1.0.0",
-	"name": "Globed In Pause Menu",
-	"developer": "le10x",
-	"description": "Agrega un acceso rapido a Globed en el menu de pausa.",
-	"repository": "https://github.com",
-	"tags": ["interface"],
-	"settings": {},
-	"dependencies": {
-		"geode.node-ids": {
-			"version": "v1.23.3",
-			"importance": "required"
+	"name": "Difficulty Meter 2",
+	"developer": "LexSunGD",
+	"description": "Esto es un mod que agrega un medidor de dificultad personalizado en el nivel.",
+	"repository": "githubcom",
+	"tags": ["interface", "utility"],
+	"resources": {
+		"sprites": [
+			"resources/*.png"
+		]
+	},
+	"settings": {
+		"meter-scale": {
+			"name": "Escala del Medidor",
+			"description": "Controla el tamaño. 1.0 es original, 2.0 el doble, 0.5 la mitad.",
+			"type": "float",
+			"default": 1.0,
+			"min": 0.1,
+			"max": 5.0
 		},
-		"dankmeme.globed2": {
-			"version": "v2.1.4",
-			"importance": "suggested"
+		"meter-pos-x": {
+			"name": "Posición X (Offset)",
+			"description": "Desplazamiento horizontal. 0 coloca el medidor en el centro.",
+			"type": "int",
+			"default": 0,
+			"min": -500,
+			"max": 500
+		},
+		"meter-pos-y": {
+			"name": "Posición Y (Offset)",
+			"description": "Desplazamiento vertical en base al centro de la pantalla. 0 es el centro.",
+			"type": "int",
+			"default": 130,
+			"min": -300,
+			"max": 300
+		},
+		"meter-opacity": {
+			"name": "Opacidad",
+			"description": "Porcentaje de visibilidad del medidor.",
+			"type": "int",
+			"default": 100,
+			"min": 0,
+			"max": 100
 		}
 	}
 }
