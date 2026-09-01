@@ -2,6 +2,7 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <fstream>
 #include <sstream>
+#include <filesystem> // 👈 Reemplazo oficial de ghc::filesystem
 
 using namespace geode::prelude;
 
@@ -23,8 +24,8 @@ class $modify(MyPlayLayer, PlayLayer) {
         auto configDir = Mod::get()->getConfigDir();
         auto jsonPath = configDir / "recipe.json";
 
-        // Si el archivo no existe en la carpeta config, lo creamos de forma automática escribiendo el texto plano
-        if (!ghc::filesystem::exists(jsonPath)) {
+        // CORRECCIÓN: Usamos std::filesystem de C++ estándar en lugar de ghc
+        if (!std::filesystem::exists(jsonPath.string())) {
             std::string defaultJsonStr = 
             "[\n"
             "    { \"percentage\": 0.0, \"sprite\": \"NA_dif.png\" },\n"
@@ -46,28 +47,27 @@ class $modify(MyPlayLayer, PlayLayer) {
             file.close();
         }
 
-        // Leer el archivo JSON de forma segura usando la API estándar de Geode
         std::ifstream file(jsonPath);
         if (file.is_open()) {
             std::stringstream buffer;
             buffer << file.rdbuf();
             file.close();
 
-            // Usamos matjson::parse pasándole directamente la cadena de texto
             auto jsonResult = matjson::parse(buffer.str());
             
-            // CORRECCIÓN: En Geode, la verificación del Result usa .has_value() y .value()
-            if (jsonResult.has_value()) {
-                auto json = jsonResult.value();
+            // CORRECCIÓN: En el SDK moderno, geode::Result se valida tratándolo como booleano directo
+            if (jsonResult) {
+                // CORRECCIÓN: Desempaquetamos usando unwrap()
+                auto json = jsonResult.unwrap();
                 
-                // CORRECCIÓN: Comprobamos si es un arreglo usando el enum nativo matjson::Type::Array
+                // Iteramos directamente usando un bucle de tamaño clásico sobre la estructura del arreglo
                 if (json.type() == matjson::Type::Array) {
                     for (size_t i = 0; i < json.size(); ++i) {
                         auto item = json[i];
                         if (item.contains("percentage") && item.contains("sprite")) {
-                            // CORRECCIÓN: Extraemos los tipos primitivos directamente convirtiendo los datos
-                            float percent = static_cast<float>(item["percentage"].as<double>());
-                            std::string sprite = item["sprite"].as<std::string>();
+                            // CORRECCIÓN: Extraemos el valor desempaquetando los nuevos geode::Result de matjson
+                            float percent = static_cast<float>(item["percentage"].asDouble().unwrap());
+                            std::string sprite = item["sprite"].asString().unwrap();
                             safeFields->m_loadedRecipe.push_back({ percent, sprite });
                         }
                     }
