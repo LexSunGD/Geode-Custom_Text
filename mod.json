@@ -6,56 +6,12 @@
 		"mac": "2.2081",
 		"ios": "2.2081"
 	},
-	"id": "lexsungd.difficulty_meter_two",
+	"id": "lexsungd.camera_cube_two",
 	"version": "1.0.0",
-	"name": "Difficulty Meter 2",
+	"name": "Camera Cube 2",
 	"developer": "LexSunGD",
-	"description": "Esto es un mod que agrega un medidor de dificultad personalizado en el nivel.",
+	"description": "description.",
 	"repository": "githubcom",
-	"tags": ["interface", "utility"],
-	"resources": {
-		"sprites": [
-			"resources/*.png"
-		]
-	},
-	"settings": {
-		"disable-mod": {
-			"name": "Desactivar Mod",
-			"description": "Si está encendido, el medidor de dificultad personalizado no aparecerá.",
-			"type": "bool",
-			"default": false
-		},
-		"meter-scale": {
-			"name": "Escala del Medidor",
-			"description": "Controla el tamaño. 1.0 es original, 2.0 el doble, 0.5 la mitad.",
-			"type": "float",
-			"default": 1.0,
-			"min": 0.1,
-			"max": 5.0
-		},
-		"meter-pos-x": {
-			"name": "Posición X (Offset)",
-			"description": "Desplazamiento horizontal. 0 coloca el medidor en el centro.",
-			"type": "int",
-			"default": 0,
-			"min": -500,
-			"max": 500
-		},
-		"meter-pos-y": {
-			"name": "Posición Y (Offset)",
-			"description": "Desplazamiento vertical en base al centro de la pantalla. 0 es el centro.",
-			"type": "int",
-			"default": 130,
-			"min": -300,
-			"max": 300
-		},
-		"meter-opacity": {
-			"name": "Opacidad",
-			"description": "Porcentaje de visibilidad del medidor.",
-			"type": "int",
-			"default": 100,
-			"min": 0,
-			"max": 100
-		}
-	}
+	"tags": [],
+	"settings": {}
 }
