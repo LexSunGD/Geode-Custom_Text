@@ -3,35 +3,35 @@
 
 using namespace geode::prelude;
 
-// ID único para identificar el texto en la escena
 #define TEXT_ID "mi-texto-global"_spr
 
-// Hacemos un hook a CCDirector, que maneja las escenas de Geometry Dash
 class $modify(MyCCDirector, CCDirector) {
 
-    // Sobrescribimos el método drawScene, que se ejecuta en cada maldito frame del juego
     void drawScene() {
-        // Ejecutamos primero el comportamiento original del juego para que renderice todo normalmente
         CCDirector::drawScene();
 
-        // Obtenemos la escena que se está mostrando actualmente
         auto runningScene = this->getRunningScene();
         if (!runningScene) return;
 
-        // Buscamos si nuestro texto ya existe en la pantalla actual
         auto textoExistente = runningScene->getChildByID(TEXT_ID);
 
         if (!textoExistente) {
-            // Si no existe en esta escena, lo creamos
-            auto miTexto = CCLabelBMFont::create("Texto Global en todo GD", "chatFont.fnt");
+            // Cambiamos "chatFont.fnt" por "gjFont09.fnt" (Pusab limpia)
+            auto miTexto = CCLabelBMFont::create("TU MARCA DE AGUA", "gjFont09.fnt");
             
-            // Lo posicionamos (abajo a la izquierda)
+            // Forzamos el color a Blanco Puro (R: 255, G: 255, B: 255)
+            miTexto->setColor({ 255, 255, 255 });
+
+            // OPCIONAL: Añade opacidad para efecto marca de agua (0 transparente, 255 sólido)
+            // 150 es un buen balance para que sea visible pero traslúcido
+            miTexto->setOpacity(150); 
+            
+            // Posicionamiento y escala
             miTexto->setPosition({ 15, 15 });
             miTexto->setAnchorPoint({ 0.0f, 0.0f });
-            miTexto->setScale(0.5f);
+            miTexto->setScale(0.4f); // Pusab suele verse más grande, bajamos la escala a 0.4f
             miTexto->setID(TEXT_ID);
 
-            // ZOrder de 9999 para que siempre quede pintado al frente de todo
             runningScene->addChild(miTexto, 9999);
         }
     }
