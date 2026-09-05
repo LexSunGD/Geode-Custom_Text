@@ -13,29 +13,36 @@ class $modify(MyCCDirector, CCDirector) {
         auto runningScene = this->getRunningScene();
         if (!runningScene) return;
 
-        // Buscamos si el texto ya existe en la escena activa
-        auto textoExistente = runningScene->getChildByID(TEXT_ID);
+        // Leemos las configuraciones de Geode en tiempo real
+        std::string configuracionTexto = Mod::get()->getSettingValue<std::string>("texto-marca");
+        float posX = Mod::get()->getSettingValue<double>("posicion-x");
+        float posY = Mod::get()->getSettingValue<double>("posicion-y");
+        int opacidad = Mod::get()->getSettingValue<int64_t>("opacidad-marca");
+        float escala = Mod::get()->getSettingValue<double>("escala-marca");
+
+        // Buscamos si el texto ya existe en la pantalla actual
+        auto textoExistente = static_cast<CCLabelBMFont*>(runningScene->getChildByID(TEXT_ID));
 
         if (!textoExistente) {
-            // "bigFont.fnt" es la fuente Pusab real y limpia de Geometry Dash
-            auto miTexto = CCLabelBMFont::create("TU MARCA DE AGUA", "bigFont.fnt");
-            
-            // Color blanco puro
+            // Si no existe, lo creamos con la fuente Pusab real
+            auto miTexto = CCLabelBMFont::create(configuracionTexto.c_str(), "bigFont.fnt");
             miTexto->setColor({ 255, 255, 255 });
-
-            // Opacidad de marca de agua (150 es un buen balance)
-            miTexto->setOpacity(150); 
-            
-            // Posicionamiento en la esquina inferior izquierda
-            miTexto->setPosition({ 15, 15 });
             miTexto->setAnchorPoint({ 0.0f, 0.0f });
-            
-            // Pusab es gruesa, bajamos la escala a 0.35f para que se vea fina
-            miTexto->setScale(0.35f); 
             miTexto->setID(TEXT_ID);
+            
+            // Aplicamos los valores dinámicos
+            miTexto->setPosition({ posX, posY });
+            miTexto->setOpacity(static_cast<GLubyte>(opacidad));
+            miTexto->setScale(escala);
 
-            // Lo agregamos al frente de la escena actual
             runningScene->addChild(miTexto, 9999);
+        } else {
+            // Si el texto ya existe, actualizamos constantemente sus propiedades.
+            // Esto permite cambiar los ajustes en el menú de Geode sin reiniciar el juego.
+            textoExistente->setString(configuracionTexto.c_str());
+            textoExistente->setPosition({ posX, posY });
+            textoExistente->setOpacity(static_cast<GLubyte>(opacidad));
+            textoExistente->setScale(escala);
         }
     }
 };
