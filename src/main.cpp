@@ -1,38 +1,38 @@
 #include <Geode/Geode.hpp>
-#include <Geode/modify/CCDirector.hpp>
+#include <Geode/modify/NotificationLayer.hpp>
 
 using namespace geode::prelude;
 
 #define TEXT_ID "mi-texto-global"_spr
 
-class $modify(MyCCDirector, CCDirector) {
+// Hacemos el hook a la capa de notificaciones globales de Geode
+class $modify(MyNotificationLayer, NotificationLayer) {
 
-    void drawScene() {
-        CCDirector::drawScene();
+    // Se ejecuta una sola vez cuando el juego arranca y crea esta capa permanente
+    bool init() {
+        if (!NotificationLayer::init()) return false;
 
-        auto runningScene = this->getRunningScene();
-        if (!runningScene) return;
+        // "bigFont.fnt" es la fuente Pusab real y limpia de Geometry Dash
+        auto miTexto = CCLabelBMFont::create("TU MARCA DE AGUA", "bigFont.fnt");
+        
+        // Color blanco puro
+        miTexto->setColor({ 255, 255, 255 });
 
-        auto textoExistente = runningScene->getChildByID(TEXT_ID);
+        // Opacidad para efecto marca de agua (ajusta a tu gusto entre 0 y 255)
+        miTexto->setOpacity(130); 
+        
+        // Configuración de posición fina en la esquina inferior izquierda
+        miTexto->setPosition({ 15, 15 });
+        miTexto->setAnchorPoint({ 0.0f, 0.0f });
+        
+        // Pusab es una fuente muy gruesa, una escala entre 0.3f y 0.4f es perfecta para marca de agua
+        miTexto->setScale(0.35f); 
+        miTexto->setID(TEXT_ID);
 
-        if (!textoExistente) {
-            // Cambiamos "chatFont.fnt" por "gjFont09.fnt" (Pusab limpia)
-            auto miTexto = CCLabelBMFont::create("TU MARCA DE AGUA", "gjFont09.fnt");
-            
-            // Forzamos el color a Blanco Puro (R: 255, G: 255, B: 255)
-            miTexto->setColor({ 255, 255, 255 });
+        // Añadimos el texto a la capa de notificaciones con un ZOrder extremadamente alto.
+        // Al estar en esta capa, JAMÁS parpadeará y se renderizará por encima de cualquier ventana emergente.
+        this->addChild(miTexto, 99999);
 
-            // OPCIONAL: Añade opacidad para efecto marca de agua (0 transparente, 255 sólido)
-            // 150 es un buen balance para que sea visible pero traslúcido
-            miTexto->setOpacity(150); 
-            
-            // Posicionamiento y escala
-            miTexto->setPosition({ 15, 15 });
-            miTexto->setAnchorPoint({ 0.0f, 0.0f });
-            miTexto->setScale(0.4f); // Pusab suele verse más grande, bajamos la escala a 0.4f
-            miTexto->setID(TEXT_ID);
-
-            runningScene->addChild(miTexto, 9999);
-        }
+        return true;
     }
 };
