@@ -8,7 +8,7 @@ else()
 endif()
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-project(GlobedInPauseMenu VERSION 1.0.0)
+project(CustomText VERSION 1.0.0)
 
 add_library(${PROJECT_NAME} SHARED
     src/main.cpp
