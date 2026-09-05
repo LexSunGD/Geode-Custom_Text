@@ -1,41 +1,41 @@
 #include <Geode/Geode.hpp>
-#include <Geode/modify/PlayLayer.hpp>
 
 using namespace geode::prelude;
 
-// Variable global o estática para saber a quién seguir (false = Jugador 1, true = Jugador 2)
-bool g_followPlayer2 = false;
+// Creamos un ID único global para encontrar nuestro texto fácilmente
+#define TEXT_ID "mi-texto-global"_spr
 
-class $modify(MyPlayLayer, PlayLayer) {
-    
-    // 1. Hook para detectar cuando se presiona la tecla o botón
-    void update(float dt) {
-        PlayLayer::update(dt);
+// Función que se ejecutará en cada frame del juego
+void actualizarTextoGlobal(float dt) {
+    // Obtenemos la escena que se está mostrando actualmente en el juego
+    auto runningScene = CCDirector::sharedDirector()->getRunningScene();
+    if (!runningScene) return;
 
-        // Ejemplo usando una tecla física (por ejemplo, la tecla 'C')
-        // En una implementación real, es mejor usar el 'CCKeyboardDispatcher' de Cocos2d-x o un botón en la UI
-        if (CCKeyboardDispatcher::get()->getAsyncKeyState(enumKeyCodes::KEY_C)) {
-            // Alternar entre Jugador 1 y Jugador 2
-            g_followPlayer2 = !g_followPlayer2;
-            
-            // Mostrar un pequeño mensaje en pantalla para confirmar el cambio
-            Notification::create(
-                g_followPlayer2 ? "Siguiendo a Jugador 2" : "Siguiendo a Jugador 1", 
-                NotificationIcon::Info
-            )->show();
-        }
+    // Buscamos si nuestro texto ya existe en la escena actual
+    auto textoExistente = runningScene->getChildByID(TEXT_ID);
 
-        // 2. Modificar el objetivo de la cámara en el modo Plataforma
-        // PlayLayer maneja la cámara del modo plataforma a través de punteros internos o llamando al método nativo
-        if (m_levelSettings->m_platformerMode) {
-            // Hack directo: Intercambiamos temporalmente los punteros antes de que la cámara actualice
-            // O modificamos la función nativa 'cameraMoveToPlayer' si es necesario.
-            if (g_followPlayer2 && m_player2) {
-                // Forzamos a la cámara a centrarse en el Jugador 2
-                this->cameraMoveToPlayer(m_player2); 
-            } else {
-                this->cameraMoveToPlayer(m_player1);
-            }
-        }
+    if (!textoExistente) {
+        // Si no existe en esta pantalla, lo creamos desde cero
+        auto miTexto = CCLabelBMFont::create("Texto Global en todo GD", "chatFont.fnt");
+        
+        // Lo posicionamos (por ejemplo, abajo a la izquierda con un pequeño margen)
+        miTexto->setPosition({ 15, 15 });
+        miTexto->setAnchorPoint({ 0.0f, 0.0f }); // Anclaje en la esquina inferior izquierda
+        miTexto->setScale(0.5f);
+        miTexto->setID(TEXT_ID);
+
+        // ZOrder muy alto (9999) para asegurarnos de que se dibuje por encima de los menús
+        runningScene->addChild(miTexto, 9999);
     }
-};
+}
+
+// Geode ejecuta $execute cuando el mod se carga por primera vez al abrir el juego
+$execute {
+    // Registramos una función repetitiva (scheduler) que corre en cada fotograma
+    CCDirector::sharedDirector()->getScheduler()->scheduleSelector(
+        schedule_selector(actualizarTextoGlobal), 
+        CCDirector::sharedDirector(), 
+        0.0f, // 0.0f significa que se ejecuta en cada frame posible
+        false
+    );
+}
