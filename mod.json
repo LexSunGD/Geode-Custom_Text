@@ -10,8 +10,47 @@
 	"version": "1.0.0",
 	"name": "Custom Text",
 	"developer": "LexSunGD",
-	"description": "description.",
-	"repository": "githubcom",
-	"tags": [],
-	"settings": {}
+	"description": "Agrega una marca de agua personalizable con texto en todo Geometry Dash.",
+	"repository": "https://github.com",
+	"tags": ["customization", "utility"],
+	"settings": {
+		"texto-marca": {
+			"name": "Texto",
+			"description": "El texto que se mostrará en pantalla.",
+			"type": "string",
+			"default": "TU MARCA DE AGUA"
+		},
+		"posicion-x": {
+			"name": "Posición X",
+			"description": "Posición horizontal desde la esquina izquierda.",
+			"type": "float",
+			"default": 15.0,
+			"min": 0.0,
+			"max": 1000.0
+		},
+		"posicion-y": {
+			"name": "Posición Y",
+			"description": "Posición vertical desde la esquina inferior.",
+			"type": "float",
+			"default": 15.0,
+			"min": 0.0,
+			"max": 1000.0
+		},
+		"opacidad-marca": {
+			"name": "Opacidad",
+			"description": "Transparencia del texto (0 es invisible, 255 es completamente sólido).",
+			"type": "int",
+			"default": 150,
+			"min": 0,
+			"max": 255
+		},
+		"escala-marca": {
+			"name": "Escala",
+			"description": "Tamaño del texto Pusab.",
+			"type": "float",
+			"default": 0.35,
+			"min": 0.1,
+			"max": 2.0
+		}
+	}
 }
